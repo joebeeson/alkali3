@@ -69,7 +69,13 @@
             $id = $id ?: $this->request->id;
             if ($this->_classes['model']) {
                 $options += array(
-                    'Record' => $this->_instance('model')->first($id),
+                    'Record' => call_user_func_array(
+                        array(
+                            $this->_classes['model'],
+                            'first'
+                        ),
+                        array($id)
+                    ),
                     'success' => function() {},
                     'failure' => function() {
                         $this->redirect(
@@ -103,7 +109,13 @@
         public function update($id = null, $options = array())
         {
             $id = $id ?: $this->request->id;
-            return $this->create($this->read($id, $options));
+            return $this->create(
+                array_diff_key(
+                    $this->read($id, $options),
+                    array('success' => null)
+                ),
+                $options
+            );
         }
 
         /**
